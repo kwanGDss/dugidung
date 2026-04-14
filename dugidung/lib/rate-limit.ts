@@ -1,11 +1,11 @@
 import type { Store } from "@/lib/kv";
 
 export async function checkRateLimit(
-  ip: string,
+  key: string,
   store: Store,
   limit: number,
   windowSeconds: number,
 ): Promise<boolean> {
-  const n = await store.incr(`rl:${ip}`, windowSeconds);
+  const n = await store.incr(`rl:${key}`, windowSeconds);
   return n <= limit;
 }

@@ -18,27 +18,39 @@ const BodySchema = z.object({ a: PersonSchema, b: PersonSchema });
 type Deps = { store: Store; call?: Caller["call"] };
 let DEPS: Deps = { store: defaultStore() };
 export function __setDeps(d: Partial<Deps>) {
+  if (process.env.NODE_ENV !== "test") {
+    throw new Error("__setDeps is test-only");
+  }
   DEPS = { ...DEPS, ...d };
 }
 
 function ipOf(req: Request): string {
   const xff = req.headers.get("x-forwarded-for");
-  return (xff?.split(",")[0] ?? "unknown").trim();
+  if (xff) return xff.split(",")[0].trim();
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
+  return "unknown";
 }
 
 function json(data: unknown, init?: ResponseInit): Response {
   return new Response(JSON.stringify(data), {
     ...init,
-    headers: { "content-type": "application/json", ...(init?.headers ?? {}) },
+    headers: { ...(init?.headers ?? {}), "content-type": "application/json" },
   });
 }
 
 export async function POST(req: Request): Promise<Response> {
   const store = DEPS.store;
   const ip = ipOf(req);
+  const rateLimitKey = `compat:${ip}`;
 
-  if (!(await checkRateLimit(ip, store, 10, 60))) {
-    return json({ error: "rate_limited" }, { status: 429, headers: { "retry-after": "60" } });
+  try {
+    if (!(await checkRateLimit(rateLimitKey, store, 10, 60))) {
+      return json({ error: "rate_limited" }, { status: 429, headers: { "retry-after": "60" } });
+    }
+  } catch (err) {
+    console.error("rate limit check failed", { ip, err });
+    // fail open — don't lock out on transient KV errors
   }
 
   let parsed;
@@ -54,7 +66,13 @@ export async function POST(req: Request): Promise<Response> {
   const hash = hashInputs(a, b);
   const cacheKey = `compat:${hash}`;
 
-  const cached = await store.get<CompatRecord>(cacheKey);
+  let cached: CompatRecord | null;
+  try {
+    cached = await store.get<CompatRecord>(cacheKey);
+  } catch (err) {
+    console.error("kv get failed", { hash, err });
+    return json({ error: "kv_unavailable" }, { status: 503, headers: { "retry-after": "10" } });
+  }
   if (cached) return json({ hash });
 
   let pillarsA, pillarsB;
