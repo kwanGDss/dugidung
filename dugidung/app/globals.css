@@ -11,6 +11,9 @@
   body {
     font-family: "Nanum Myeongjo", "Noto Serif KR", serif;
     line-height: 1.85;
+    /* 한글은 어절 단위로 줄바꿈 (단어 중간에서 끊지 않음) */
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
   ::selection { background: #D4B678; color: #0E1324; }
 }
