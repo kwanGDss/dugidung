@@ -28,6 +28,15 @@ describe("POST /api/compat", () => {
           title: "나무가 불을 만나면",
           body: "첫 문단 내용이 충분히 길어야 zod 검증을 통과한다. 두 사람의 오행이 상생 관계라면 나무가 불을 키우고, 불은 다시 나무의 시간을 바꾼다.\n\n둘째 문단. 다만 젖은 날엔 애를 먹는다. 그래도 봄의 한복판은 아니어도 저녁의 온도는 맞는 관계다.\n\n셋째 문단. 서두르지 말 것. 천천히 서로의 연료가 되어가는 것으로 충분하다.",
           pullQuote: "너희는 서로에게 연료이자 불씨다",
+          archetype: {
+            name: "불씨와 장작",
+            description: "한쪽이 불을 피우고 한쪽이 연료를 대는 관계. 서로 없으면 오래 못 탄다.",
+          },
+          seasons: {
+            strength: "속도가 다른 날에도 서로의 온도는 맞다.",
+            tension: "한 쪽이 조급할 때 다른 한 쪽이 주춤한다.",
+            advice: "싸운 날엔 해명보다 침묵을 먼저.",
+          },
         });
       }),
     });
@@ -74,5 +83,45 @@ describe("POST /api/compat", () => {
     }
     const res = await POST(req({ ...VALID, a: { ...VALID.a, birth: "1980-03-12" } }));
     expect(res.status).toBe(429);
+  });
+
+  it("treats a stale v1 cache record as a miss", async () => {
+    // Fresh scoped store so we can poison it directly after the first POST
+    const store = createMemoryStore();
+    let calls = 0;
+    __setDeps({
+      store,
+      call: vi.fn(async () => {
+        calls++;
+        return JSON.stringify({
+          title: "나무가 불을 만나면",
+          body: "첫 문단 내용이 충분히 길어야 zod 검증을 통과한다. 두 사람의 오행이 상생 관계라면 나무가 불을 키우고, 불은 다시 나무의 시간을 바꾼다.\n\n둘째 문단. 다만 젖은 날엔 애를 먹는다. 그래도 봄의 한복판은 아니어도 저녁의 온도는 맞는 관계다.\n\n셋째 문단. 서두르지 말 것. 천천히 서로의 연료가 되어가는 것으로 충분하다.",
+          pullQuote: "너희는 서로에게 연료이자 불씨다",
+          archetype: {
+            name: "불씨와 장작",
+            description: "한쪽이 불을 피우고 한쪽이 연료를 대는 관계. 서로 없으면 오래 못 탄다.",
+          },
+          seasons: {
+            strength: "속도가 다른 날에도 서로의 온도는 맞다.",
+            tension: "한 쪽이 조급할 때 다른 한 쪽이 주춤한다.",
+            advice: "싸운 날엔 해명보다 침묵을 먼저.",
+          },
+        });
+      }),
+    });
+
+    // First POST creates a fresh v2 record
+    const r1 = await POST(req(VALID));
+    expect(r1.status).toBe(200);
+    expect(calls).toBe(1);
+    const { hash } = (await r1.json()) as { hash: string };
+
+    // Poison the cache with a v1-shaped record at the same key
+    await store.set(`compat:${hash}`, { version: 1, hash, stale: true });
+
+    // Second POST with same input: route must treat v1 as miss and re-call LLM
+    const r2 = await POST(req(VALID));
+    expect(r2.status).toBe(200);
+    expect(calls).toBe(2);
   });
 });

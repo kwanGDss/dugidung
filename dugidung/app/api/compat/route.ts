@@ -64,7 +64,9 @@ export async function POST(req: Request): Promise<Response> {
     console.error("kv get failed", { hash, err });
     return json({ error: "kv_unavailable" }, { status: 503, headers: { "retry-after": "10" } });
   }
-  if (cached) return json({ hash });
+  // Version gate: treat stale-schema records as misses so old caches don't
+  // surface v1 data in the v2 result page.
+  if (cached && cached.version === 2) return json({ hash });
 
   let pillarsA, pillarsB;
   try {
@@ -87,7 +89,7 @@ export async function POST(req: Request): Promise<Response> {
   );
 
   const record: CompatRecord = {
-    version: 1,
+    version: 2,
     hash,
     createdAt: new Date().toISOString(),
     inputs: { a, b },
