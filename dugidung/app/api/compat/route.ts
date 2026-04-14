@@ -3,9 +3,9 @@ import type { CompatRecord, Inputs } from "@/lib/types";
 import { birthToPillars, BirthOutOfRangeError } from "@/lib/saju";
 import { computeScore } from "@/lib/score";
 import { hashInputs } from "@/lib/hash";
-import { defaultStore, type Store } from "@/lib/kv";
-import { generateLetter, type Caller } from "@/lib/llm";
+import { generateLetter } from "@/lib/llm";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getStore, getCall } from "@/lib/compat-deps";
 
 const MBTI = /^[EI][NS][TF][JP]$/;
 const PersonSchema = z.object({
@@ -14,15 +14,6 @@ const PersonSchema = z.object({
   name: z.string().max(20).optional(),
 });
 const BodySchema = z.object({ a: PersonSchema, b: PersonSchema });
-
-type Deps = { store: Store; call?: Caller["call"] };
-let DEPS: Deps = { store: defaultStore() };
-export function __setDeps(d: Partial<Deps>) {
-  if (process.env.NODE_ENV !== "test") {
-    throw new Error("__setDeps is test-only");
-  }
-  DEPS = { ...DEPS, ...d };
-}
 
 function ipOf(req: Request): string {
   const xff = req.headers.get("x-forwarded-for");
@@ -40,7 +31,7 @@ function json(data: unknown, init?: ResponseInit): Response {
 }
 
 export async function POST(req: Request): Promise<Response> {
-  const store = DEPS.store;
+  const store = getStore();
   const ip = ipOf(req);
   const rateLimitKey = `compat:${ip}`;
 
@@ -87,11 +78,12 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const score = computeScore(pillarsA, pillarsB, a.mbti, b.mbti);
+  const call = getCall();
   const letter = await generateLetter(
     { a: { birth: a.birth, mbti: a.mbti, pillars: pillarsA },
       b: { birth: b.birth, mbti: b.mbti, pillars: pillarsB },
       score },
-    DEPS.call ? { call: DEPS.call } : {},
+    call ? { call } : {},
   );
 
   const record: CompatRecord = {

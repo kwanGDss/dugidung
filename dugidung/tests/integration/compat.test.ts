@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { POST, __setDeps } from "@/app/api/compat/route";
+import { POST } from "@/app/api/compat/route";
+import { __setDeps } from "@/lib/compat-deps";
 import { createMemoryStore } from "@/lib/kv";
 
 function req(body: unknown, ip = "1.2.3.4"): Request {
