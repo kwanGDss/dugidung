@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import type { CompatRecord } from "@/lib/types";
 import { defaultStore } from "@/lib/kv";
 import { combineDistribution } from "@/lib/ohaeng-distribution";
-import { explainScore } from "@/lib/score-explanation";
 import ScoreRing from "@/components/ScoreRing";
 import DimensionBars from "@/components/DimensionBars";
 import LetterView from "@/components/LetterView";
@@ -12,7 +11,6 @@ import ArchetypeBadge from "@/components/ArchetypeBadge";
 import PillarCards from "@/components/PillarCards";
 import OhaengDistribution from "@/components/OhaengDistribution";
 import SeasonCards from "@/components/SeasonCards";
-import ScoreBreakdown from "@/components/ScoreBreakdown";
 
 interface Props { params: Promise<{ hash: string }> }
 
@@ -72,13 +70,6 @@ export default async function Result({ params }: Props) {
   const imageUrl = `${base}/r/${rec.hash}/opengraph-image`;
 
   const distribution = combineDistribution(rec.pillars.a, rec.pillars.b);
-  const explanation = explainScore(
-    rec.pillars.a,
-    rec.pillars.b,
-    rec.inputs.a.mbti,
-    rec.inputs.b.mbti,
-    rec.score,
-  );
 
   return (
     <main className="relative min-h-screen px-6 py-16">
@@ -117,10 +108,7 @@ export default async function Result({ params }: Props) {
         {/* 7. 관계의 계절 */}
         <SeasonCards seasons={rec.letter.seasons} />
 
-        {/* 8. 점수 근거 토글 */}
-        <ScoreBreakdown total={rec.score.total} explanation={explanation} />
-
-        {/* 9. 요약 */}
+        {/* 8. 요약 */}
         <Summary rec={rec} />
 
         {/* 10. 공유 바 */}
