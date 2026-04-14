@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import LoadingOverlay from "@/components/LoadingOverlay";
 
 type Axis = "EI" | "NS" | "TF" | "JP";
 type Person = { name: string; birth: string; mbti: string[]; mbtiUnknown: boolean };
@@ -137,7 +138,9 @@ export default function CoupleForm() {
   }
 
   return (
-    <form onSubmit={submit} className="max-w-2xl w-full space-y-6">
+    <>
+      <LoadingOverlay open={pending} />
+      <form onSubmit={submit} className="max-w-2xl w-full space-y-6">
       <div className="grid md:grid-cols-2 gap-6">
         <PersonFields label="A" value={a} onChange={setA} />
         <PersonFields label="B" value={b} onChange={setB} />
@@ -152,6 +155,7 @@ export default function CoupleForm() {
           {pending ? "...기둥을 겹치는 중" : "기둥을 겹치다"}
         </button>
       </div>
-    </form>
+      </form>
+    </>
   );
 }

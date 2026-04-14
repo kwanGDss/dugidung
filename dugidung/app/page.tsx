@@ -1,8 +1,18 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
     <main className="relative min-h-screen flex items-center justify-center px-6">
+      <Image
+        src="/bg-landing.jpg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover opacity-35"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-bg/60 via-bg/45 to-bg" />
       <div className="starfield" aria-hidden />
       <div className="relative text-center max-w-md">
         <div className="text-sm tracking-[0.35em] text-muted mb-10">兩 · 두 기 둥</div>
