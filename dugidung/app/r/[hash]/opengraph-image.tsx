@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import type { CompatRecord } from "@/lib/types";
 import { defaultStore } from "@/lib/kv";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const alt = "두기둥 궁합 결과";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
