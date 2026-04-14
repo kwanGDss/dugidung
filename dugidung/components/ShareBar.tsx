@@ -83,6 +83,9 @@ export default function ShareBar({
 
   function shareKakao() {
     if (!window.Kakao?.Share) return;
+    // Derive /form URL from the origin (same host, no path)
+    const origin = new URL(url).origin;
+    const formUrl = `${origin}/form`;
     window.Kakao.Share.sendDefault({
       objectType: "feed",
       content: {
@@ -92,10 +95,8 @@ export default function ShareBar({
         link: { mobileWebUrl: url, webUrl: url },
       },
       buttons: [
-        {
-          title: "결과 보기",
-          link: { mobileWebUrl: url, webUrl: url },
-        },
+        { title: "결과 보기", link: { mobileWebUrl: url, webUrl: url } },
+        { title: "나도 해보기", link: { mobileWebUrl: formUrl, webUrl: formUrl } },
       ],
     });
   }
