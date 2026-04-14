@@ -9,6 +9,15 @@ const LetterSchema = z.object({
   title: z.string().min(3).max(30),
   body: z.string().min(100).max(1200),
   pullQuote: z.string().min(8).max(60),
+  archetype: z.object({
+    name: z.string().min(2).max(20),
+    description: z.string().min(10).max(120),
+  }),
+  seasons: z.object({
+    strength: z.string().min(10).max(160),
+    tension: z.string().min(10).max(160),
+    advice: z.string().min(10).max(160),
+  }),
 });
 
 export interface GenerateArgs {
