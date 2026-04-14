@@ -13,6 +13,11 @@ export default async function Image({ params }: { params: Promise<{ hash: string
   const score = rec?.score.total ?? 0;
   const quote = rec?.letter.pullQuote ?? "두 기둥을 겹쳐봅니다";
 
+  // SVG donut parameters (Satori supports SVG + stroke-dasharray, not conic-gradient).
+  const ringR = 115;
+  const ringCircumference = 2 * Math.PI * ringR;
+  const ringFilled = (ringCircumference * Math.max(0, Math.min(100, score))) / 100;
+
   return new ImageResponse(
     (
       <div
@@ -41,23 +46,39 @@ export default async function Image({ params }: { params: Promise<{ hash: string
             style={{
               width: 260,
               height: 260,
-              borderRadius: "50%",
-              background: `conic-gradient(#D4B678 0% ${score}%, #232A42 ${score}% 100%)`,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               position: "relative",
             }}
           >
-            <div
-              style={{
-                position: "absolute",
-                inset: 20,
-                borderRadius: "50%",
-                background: "#0E1324",
-                display: "flex",
-              }}
-            />
+            <svg
+              width={260}
+              height={260}
+              viewBox="0 0 260 260"
+              style={{ position: "absolute", top: 0, left: 0 }}
+            >
+              <circle
+                cx={130}
+                cy={130}
+                r={ringR}
+                fill="none"
+                stroke="#232A42"
+                strokeWidth={22}
+              />
+              <circle
+                cx={130}
+                cy={130}
+                r={ringR}
+                fill="none"
+                stroke="#D4B678"
+                strokeWidth={22}
+                strokeDasharray={`${ringFilled} ${ringCircumference}`}
+                strokeDashoffset={0}
+                transform="rotate(-90 130 130)"
+                strokeLinecap="butt"
+              />
+            </svg>
             <span style={{ position: "relative", fontSize: 120, color: "#F4E9CE" }}>{score}</span>
           </div>
           <div
