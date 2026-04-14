@@ -8,29 +8,15 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 /**
- * Google Fonts 에서 한글 서브셋 TTF 를 런타임에 가져와 Satori 에 주입.
- * Satori 는 기본적으로 한글 글리프가 없는 라틴 폰트만 내장하므로,
- * 이 함수 없이는 한글이 tofu/깨진 글리프로 렌더됨.
+ * Noto Serif KR (Korean subset, weight 500) WOFF2 를 co-located 파일에서 로드.
+ * Next.js 번들러가 `new URL('./file', import.meta.url)` 패턴을 감지하여
+ * 파일을 서버 번들에 자동 포함시킴 — 런타임 외부 네트워크 의존성 제거.
  */
-async function loadKoreanFont(text: string): Promise<ArrayBuffer> {
-  const url =
-    `https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500` +
-    `&text=${encodeURIComponent(text)}`;
-  const cssResp = await fetch(url, {
-    headers: {
-      // Google Fonts 가 User-Agent 에 따라 다른 format 을 반환 — 모던 브라우저처럼 요청
-      "user-agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    },
-  });
-  if (!cssResp.ok) throw new Error(`google fonts css fetch failed: ${cssResp.status}`);
-  const css = await cssResp.text();
-  const match = css.match(/src:\s*url\(([^)]+)\)\s*format\(['"](woff2?|truetype|opentype)['"]\)/);
-  if (!match) throw new Error("font url not found in google fonts css");
-  const fontResp = await fetch(match[1]);
-  if (!fontResp.ok) throw new Error(`font binary fetch failed: ${fontResp.status}`);
-  return fontResp.arrayBuffer();
+async function loadKoreanFont(): Promise<ArrayBuffer> {
+  const fontUrl = new URL("./NotoSerifKR-KR-500.woff2", import.meta.url);
+  const resp = await fetch(fontUrl);
+  if (!resp.ok) throw new Error(`local font fetch failed: ${resp.status}`);
+  return resp.arrayBuffer();
 }
 
 export default async function Image({ params }: { params: Promise<{ hash: string }> }) {
@@ -44,11 +30,9 @@ export default async function Image({ params }: { params: Promise<{ hash: string
   const ringCircumference = 2 * Math.PI * ringR;
   const ringFilled = (ringCircumference * Math.max(0, Math.min(100, score))) / 100;
 
-  // 폰트 로드에 필요한 모든 글리프를 한 번에 subset 요청
-  const textForFont = `兩 두 기 둥 ${score} ${quote} dugidungvercelapp0123456789`;
   let fontData: ArrayBuffer | null = null;
   try {
-    fontData = await loadKoreanFont(textForFont);
+    fontData = await loadKoreanFont();
   } catch (err) {
     console.error("og font load failed", err);
   }
