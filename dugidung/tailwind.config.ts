@@ -15,6 +15,15 @@ const config: Config = {
       fontFamily: {
         serif: ['"Nanum Myeongjo"', '"Noto Serif KR"', "serif"],
       },
+      keyframes: {
+        breathe: {
+          "0%, 100%": { transform: "scale(0.85)", opacity: "0.4" },
+          "50%":      { transform: "scale(1.05)", opacity: "1" },
+        },
+      },
+      animation: {
+        breathe: "breathe 3s ease-in-out infinite",
+      },
     },
   },
   plugins: [],
