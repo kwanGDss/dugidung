@@ -3,9 +3,9 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 type Axis = "EI" | "NS" | "TF" | "JP";
-type Person = { name: string; birth: string; mbti: string[] };
+type Person = { name: string; birth: string; mbti: string[]; mbtiUnknown: boolean };
 
-const EMPTY: Person = { name: "", birth: "", mbti: ["E", "N", "F", "J"] };
+const EMPTY: Person = { name: "", birth: "", mbti: ["E", "N", "F", "J"], mbtiUnknown: false };
 const LETTERS: Record<Axis, [string, string]> = {
   EI: ["E", "I"], NS: ["N", "S"], TF: ["T", "F"], JP: ["J", "P"],
 };
@@ -20,6 +20,7 @@ function PersonFields({ label, value, onChange }: {
   onChange: (p: Person) => void;
 }) {
   function toggle(idx: number, pair: [string, string]) {
+    if (value.mbtiUnknown) return;
     const next = [...value.mbti];
     next[idx] = next[idx] === pair[0] ? pair[1] : pair[0];
     onChange({ ...value, mbti: next });
@@ -49,8 +50,24 @@ function PersonFields({ label, value, onChange }: {
         />
       </div>
       <div>
-        <label className="block text-xs text-muted mb-2">MBTI</label>
-        <div className="flex gap-2">
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-xs text-muted">MBTI</label>
+          <label className="text-xs text-muted flex items-center gap-1.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={value.mbtiUnknown}
+              onChange={(e) => onChange({ ...value, mbtiUnknown: e.target.checked })}
+              className="accent-accent cursor-pointer"
+            />
+            모름
+          </label>
+        </div>
+        <div
+          className={`flex gap-2 transition-opacity ${
+            value.mbtiUnknown ? "opacity-30 pointer-events-none" : ""
+          }`}
+          aria-disabled={value.mbtiUnknown}
+        >
           {(["EI", "NS", "TF", "JP"] as Axis[]).map((ax, i) => {
             const [l, r] = LETTERS[ax];
             const active = value.mbti[i];
@@ -59,6 +76,7 @@ function PersonFields({ label, value, onChange }: {
                 type="button"
                 key={ax}
                 onClick={() => toggle(i, LETTERS[ax])}
+                tabIndex={value.mbtiUnknown ? -1 : 0}
                 className="flex-1 border border-line py-2 text-sm hover:border-accent"
               >
                 <span className={active === l ? "text-accent" : "text-muted"}>{l}</span>
@@ -92,8 +110,16 @@ export default function CoupleForm() {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          a: { birth: a.birth, mbti: mbtiString(a.mbti), name: a.name || undefined },
-          b: { birth: b.birth, mbti: mbtiString(b.mbti), name: b.name || undefined },
+          a: {
+            birth: a.birth,
+            mbti: a.mbtiUnknown ? null : mbtiString(a.mbti),
+            name: a.name || undefined,
+          },
+          b: {
+            birth: b.birth,
+            mbti: b.mbtiUnknown ? null : mbtiString(b.mbti),
+            name: b.name || undefined,
+          },
         }),
       });
       if (!res.ok) {

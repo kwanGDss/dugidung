@@ -36,4 +36,15 @@ describe("computeScore", () => {
     expect(s.dimensions.mbti).toBe(70);
     expect(s.total).toBe(78);
   });
+
+  it("uses neutral 65 for mbti when either side is null (모름)", () => {
+    const sNullA = computeScore(A, B, null, "ESTJ");
+    const sNullB = computeScore(A, B, "INFP", null);
+    const sBoth  = computeScore(A, B, null, null);
+    expect(sNullA.dimensions.mbti).toBe(65);
+    expect(sNullB.dimensions.mbti).toBe(65);
+    expect(sBoth.dimensions.mbti).toBe(65);
+    // ohaeng 90 + zodiac 65 + mbti 65 → round(40.5 + 16.25 + 19.5) = round(76.25) = 76
+    expect(sBoth.total).toBe(76);
+  });
 });

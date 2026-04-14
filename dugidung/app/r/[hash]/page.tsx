@@ -36,8 +36,8 @@ function BrandRow() {
 }
 
 function Summary({ rec }: { rec: CompatRecord }) {
-  const line = (i: { birth: string; mbti: string; name?: string }, p: { day: string; element: string }) =>
-    `${i.name ? i.name + " · " : ""}${i.birth} · ${p.day}일주 ${p.element} · ${i.mbti}`;
+  const line = (i: { birth: string; mbti: string | null; name?: string }, p: { day: string; element: string }) =>
+    `${i.name ? i.name + " · " : ""}${i.birth} · ${p.day}일주 ${p.element} · ${i.mbti ?? "MBTI 미상"}`;
   return (
     <div className="mt-11 pt-7 border-t border-line text-[12px] text-muted text-center leading-[1.9] tracking-wider">
       A · {line(rec.inputs.a, rec.pillars.a)}<br />
@@ -53,7 +53,8 @@ export default async function Result({ params }: Props) {
 
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const url = `${base}/r/${rec.hash}`;
-  const shareText = `${rec.score.total}점 — ${rec.letter.title}`;
+  const shareTitle = `${rec.score.total}점 — ${rec.letter.title}`;
+  const imageUrl = `${base}/r/${rec.hash}/opengraph-image`;
 
   return (
     <main className="relative min-h-screen px-6 py-16">
@@ -72,7 +73,12 @@ export default async function Result({ params }: Props) {
 
         <Summary rec={rec} />
 
-        <ShareBar url={url} text={shareText} />
+        <ShareBar
+          url={url}
+          title={shareTitle}
+          description={rec.letter.pullQuote}
+          imageUrl={imageUrl}
+        />
 
         <div className="text-center mt-14 text-sm text-muted">
           — <a href="/form" className="text-ink underline underline-offset-4">우리도 해보기</a> —

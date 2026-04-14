@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { hashInputs, normalizePair } from "@/lib/hash";
+import type { Inputs } from "@/lib/types";
 
-const A = { birth: "1995-03-12", mbti: "INFP", name: "가" };
-const B = { birth: "1996-08-21", mbti: "ESTJ", name: "나" };
+const A: Inputs = { birth: "1995-03-12", mbti: "INFP", name: "가" };
+const B: Inputs = { birth: "1996-08-21", mbti: "ESTJ", name: "나" };
 
 describe("hashInputs", () => {
   it("is deterministic", () => {
@@ -31,6 +32,20 @@ describe("hashInputs", () => {
   it("produces 8-character Base62 strings", () => {
     const h = hashInputs(A, B);
     expect(h).toMatch(/^[0-9A-Za-z]{8}$/);
+  });
+
+  it("handles null mbti deterministically", () => {
+    const A2: Inputs = { ...A, mbti: null };
+    expect(hashInputs(A2, B)).toBe(hashInputs(A2, B));
+    expect(hashInputs(A2, B)).not.toBe(hashInputs(A, B));
+  });
+
+  it("hash is same regardless of which side is null", () => {
+    const AUnk: Inputs = { ...A, mbti: null };
+    const BUnk: Inputs = { ...B, mbti: null };
+    // (AUnk, B) and (B, AUnk) should hash the same (order invariance)
+    expect(hashInputs(AUnk, B)).toBe(hashInputs(B, AUnk));
+    expect(hashInputs(A, BUnk)).toBe(hashInputs(BUnk, A));
   });
 });
 

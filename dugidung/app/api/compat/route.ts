@@ -10,7 +10,7 @@ import { getStore, getCall } from "@/lib/compat-deps";
 const MBTI = /^[EI][NS][TF][JP]$/;
 const PersonSchema = z.object({
   birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  mbti: z.string().regex(MBTI),
+  mbti: z.string().regex(MBTI).nullable(),
   name: z.string().max(20).optional(),
 });
 const BodySchema = z.object({ a: PersonSchema, b: PersonSchema });
@@ -51,8 +51,8 @@ export async function POST(req: Request): Promise<Response> {
     return json({ error: "invalid_input" }, { status: 400 });
   }
 
-  const a: Inputs = { ...parsed.a, mbti: parsed.a.mbti.toUpperCase() };
-  const b: Inputs = { ...parsed.b, mbti: parsed.b.mbti.toUpperCase() };
+  const a: Inputs = { ...parsed.a, mbti: parsed.a.mbti ? parsed.a.mbti.toUpperCase() : null };
+  const b: Inputs = { ...parsed.b, mbti: parsed.b.mbti ? parsed.b.mbti.toUpperCase() : null };
 
   const hash = hashInputs(a, b);
   const cacheKey = `compat:${hash}`;

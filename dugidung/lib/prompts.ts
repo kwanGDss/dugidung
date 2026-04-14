@@ -31,15 +31,21 @@ function ohaengRelationText(a: Pillars, b: Pillars): string {
 }
 
 export function buildUserPrompt(args: {
-  a: { birth: string; mbti: MBTI; pillars: Pillars };
-  b: { birth: string; mbti: MBTI; pillars: Pillars };
+  a: { birth: string; mbti: MBTI | null; pillars: Pillars };
+  b: { birth: string; mbti: MBTI | null; pillars: Pillars };
   score: Score;
 }): string {
   const { a, b, score } = args;
+  const mbtiText = (m: MBTI | null) => m ?? "MBTI 미상";
+  const bothKnown = a.mbti && b.mbti;
+  const mbtiNote = bothKnown
+    ? ""
+    : "\n\n주의: 한쪽 또는 양쪽 모두 MBTI 가 미상이다. 사주(일간 오행 + 띠) 만으로 두 사람의 기질을 추론하고, MBTI 를 언급하지 말 것.";
+
   return `다음 두 사람의 관계를 편지로 풀어주세요.
 
-A: ${a.birth}, ${a.mbti}, 일주 ${a.pillars.day}(${a.pillars.element}), ${a.pillars.zodiac}띠
-B: ${b.birth}, ${b.mbti}, 일주 ${b.pillars.day}(${b.pillars.element}), ${b.pillars.zodiac}띠
+A: ${a.birth}, ${mbtiText(a.mbti)}, 일주 ${a.pillars.day}(${a.pillars.element}), ${a.pillars.zodiac}띠
+B: ${b.birth}, ${mbtiText(b.mbti)}, 일주 ${b.pillars.day}(${b.pillars.element}), ${b.pillars.zodiac}띠
 
 오행 관계: ${ohaengRelationText(a.pillars, b.pillars)}
 12지: ${a.pillars.zodiac}/${b.pillars.zodiac}
@@ -47,8 +53,8 @@ B: ${b.birth}, ${b.mbti}, 일주 ${b.pillars.day}(${b.pillars.element}), ${b.pil
 점수:
 - 오행 ${score.dimensions.ohaeng}
 - 12지 ${score.dimensions.zodiac}
-- MBTI ${score.dimensions.mbti}
-- 총점 ${score.total}
+- MBTI ${score.dimensions.mbti}${bothKnown ? "" : " (중립 — 미상)"}
+- 총점 ${score.total}${mbtiNote}
 
 아래 JSON 스키마로만 답하세요. 설명·마크다운 금지.
 

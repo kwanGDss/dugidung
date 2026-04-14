@@ -16,7 +16,8 @@ function toBase62(bytes: Buffer): string {
 }
 
 function key(i: Inputs): string {
-  return `${i.birth}|${i.mbti.toUpperCase()}`;
+  const m = i.mbti ? i.mbti.toUpperCase() : "UNK";
+  return `${i.birth}|${m}`;
 }
 
 export function normalizePair<T extends Inputs>(a: T, b: T): [T, T] {
@@ -25,8 +26,8 @@ export function normalizePair<T extends Inputs>(a: T, b: T): [T, T] {
 
 export function hashInputs(a: Inputs, b: Inputs): string {
   const [x, y] = normalizePair(
-    { birth: a.birth, mbti: a.mbti.toUpperCase() },
-    { birth: b.birth, mbti: b.mbti.toUpperCase() },
+    { birth: a.birth, mbti: a.mbti ? a.mbti.toUpperCase() : null },
+    { birth: b.birth, mbti: b.mbti ? b.mbti.toUpperCase() : null },
   );
   const canonical = JSON.stringify([key(x), key(y)]);
   const digest = createHash("sha256").update(canonical).digest();

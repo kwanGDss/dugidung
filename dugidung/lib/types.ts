@@ -12,7 +12,7 @@ export interface Pillars {
 
 export interface Inputs {
   birth: string; // YYYY-MM-DD
-  mbti: MBTI;
+  mbti: MBTI | null; // null = 모름
   name?: string;
 }
 
