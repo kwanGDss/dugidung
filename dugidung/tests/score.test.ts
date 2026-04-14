@@ -4,8 +4,8 @@ import type { Pillars } from "@/lib/types";
 
 // Abstract test fixtures — not tied to real lunar-javascript output.
 // computeScore only uses pillars.element and pillars.zodiac.
-const A: Pillars = { year: "을해", month: "기묘", day: "갑자", zodiac: "돼지", element: "목" };
-const B: Pillars = { year: "병자", month: "병신", day: "정유", zodiac: "쥐",   element: "화" };
+const A: Pillars = { year: "을해", month: "기묘", day: "갑자", zodiac: "돼지", element: "목", elements: ["목", "수", "토", "목", "목", "수"] };
+const B: Pillars = { year: "병자", month: "병신", day: "정유", zodiac: "쥐",   element: "화", elements: ["화", "수", "화", "금", "화", "금"] };
 
 describe("computeScore", () => {
   it("returns 3 dimensions and a total in 0-100", () => {
