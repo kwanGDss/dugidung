@@ -34,6 +34,12 @@ const ZODIAC_FROM_BRANCH: Record<string, Zodiac> = {
   신: "원숭이", 유: "닭", 술: "개", 해: "돼지",
 };
 
+const BRANCH_TO_ELEMENT: Record<string, Element> = {
+  자: "수", 축: "토", 인: "목", 묘: "목",
+  진: "토", 사: "화", 오: "화", 미: "토",
+  신: "금", 유: "금", 술: "토", 해: "수",
+};
+
 function parseDate(input: string): { y: number; m: number; d: number } {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input);
   if (!m) throw new Error(`invalid date format: ${input}`);
@@ -73,5 +79,18 @@ export function birthToPillars(birth: string): Pillars {
     throw new Error(`failed to derive element/zodiac from ${year}/${day}`);
   }
 
-  return { year, month, day, zodiac, element };
+  // 연/월/일주 각각의 천간(stem) + 지지(branch) 오행 6개 — 시주 미포함
+  const elements: Element[] = [
+    STEM_TO_ELEMENT[year[0]],
+    BRANCH_TO_ELEMENT[year[1]],
+    STEM_TO_ELEMENT[month[0]],
+    BRANCH_TO_ELEMENT[month[1]],
+    STEM_TO_ELEMENT[day[0]],
+    BRANCH_TO_ELEMENT[day[1]],
+  ];
+  if (elements.some((e) => !e)) {
+    throw new Error(`failed to derive elements from ${year}/${month}/${day}`);
+  }
+
+  return { year, month, day, zodiac, element, elements };
 }
