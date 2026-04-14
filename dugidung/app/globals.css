@@ -3,6 +3,27 @@
 @tailwind utilities;
 
 @layer base {
-  html, body { background: #0E1324; color: #F4E9CE; }
-  body { font-family: "Nanum Myeongjo", "Noto Serif KR", serif; }
+  :root { color-scheme: dark; }
+  html, body {
+    background: #0E1324;
+    color: #F4E9CE;
+  }
+  body {
+    font-family: "Nanum Myeongjo", "Noto Serif KR", serif;
+    line-height: 1.85;
+  }
+  ::selection { background: #D4B678; color: #0E1324; }
+}
+
+@layer components {
+  .starfield {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      radial-gradient(1px 1px at 20% 15%, rgba(244,233,206,0.6) 50%, transparent 51%),
+      radial-gradient(1px 1px at 70% 25%, rgba(244,233,206,0.35) 50%, transparent 51%),
+      radial-gradient(1px 1px at 40% 60%, rgba(244,233,206,0.25) 50%, transparent 51%),
+      radial-gradient(1px 1px at 85% 70%, rgba(244,233,206,0.4) 50%, transparent 51%),
+      radial-gradient(1px 1px at 15% 80%, rgba(244,233,206,0.3) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 60% 40%, rgba(244,233,206,0.5) 50%, transparent 51%);
+  }
 }
