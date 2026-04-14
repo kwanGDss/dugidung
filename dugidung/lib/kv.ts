@@ -41,9 +41,17 @@ export function createVercelStore(): Store {
   };
 }
 
+declare global {
+  // eslint-disable-next-line no-var
+  var __dugidungStore: Store | undefined;
+}
+
 export function defaultStore(): Store {
-  if (process.env.NODE_ENV === "test" || !process.env.KV_REST_API_URL) {
-    return createMemoryStore();
-  }
-  return createVercelStore();
+  if (globalThis.__dugidungStore) return globalThis.__dugidungStore;
+  const store =
+    process.env.NODE_ENV === "test" || !process.env.KV_REST_API_URL
+      ? createMemoryStore()
+      : createVercelStore();
+  globalThis.__dugidungStore = store;
+  return store;
 }
