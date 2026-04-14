@@ -67,7 +67,6 @@ export default async function Result({ params }: Props) {
 
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const url = `${base}/r/${rec.hash}`;
-  const imageUrl = `${base}/r/${rec.hash}/opengraph-image`;
 
   const distribution = combineDistribution(rec.pillars.a, rec.pillars.b);
 
@@ -112,12 +111,7 @@ export default async function Result({ params }: Props) {
         <Summary rec={rec} />
 
         {/* 10. 공유 바 */}
-        <ShareBar
-          url={url}
-          title={`${rec.letter.archetype.name} · ${rec.score.total}점 — 두기둥`}
-          description={rec.letter.pullQuote}
-          imageUrl={imageUrl}
-        />
+        <ShareBar url={url} />
 
         {/* 11. CTA */}
         <div className="text-center mt-14 text-sm text-muted">

@@ -3,21 +3,11 @@ import { useState, useEffect } from "react";
 
 const KAKAO_SDK_URL = "https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js";
 
-type KakaoLink = { mobileWebUrl: string; webUrl: string };
 interface KakaoStatic {
   isInitialized: () => boolean;
   init: (key: string) => void;
   Share: {
-    sendDefault: (options: {
-      objectType: "feed";
-      content: {
-        title: string;
-        description: string;
-        imageUrl: string;
-        link: KakaoLink;
-      };
-      buttons?: Array<{ title: string; link: KakaoLink }>;
-    }) => void;
+    sendScrap: (options: { requestUrl: string }) => void;
   };
 }
 declare global {
@@ -26,17 +16,7 @@ declare global {
   }
 }
 
-export default function ShareBar({
-  url,
-  title,
-  description,
-  imageUrl,
-}: {
-  url: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-}) {
+export default function ShareBar({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
   const [kakaoReady, setKakaoReady] = useState(false);
 
@@ -83,24 +63,10 @@ export default function ShareBar({
 
   function shareKakao() {
     if (!window.Kakao?.Share) return;
-    // Derive URLs from the origin
-    const origin = new URL(url).origin;
-    const homeUrl = `${origin}/`;
-    const formUrl = `${origin}/form`;
-    window.Kakao.Share.sendDefault({
-      objectType: "feed",
-      content: {
-        title,
-        description,
-        imageUrl,
-        // 카드 본체 탭 → 홈으로. 보는 사람이 서비스 소개부터 만나게 됨.
-        link: { mobileWebUrl: homeUrl, webUrl: homeUrl },
-      },
-      buttons: [
-        { title: "결과 보기", link: { mobileWebUrl: url, webUrl: url } },
-        { title: "나도 해보기", link: { mobileWebUrl: formUrl, webUrl: formUrl } },
-      ],
-    });
+    // sendScrap: KakaoTalk scrapes the URL's OG meta tags at delivery time,
+    // so the preview card reflects the live page (title/description/og:image)
+    // and the tap target is the URL itself — no custom template needed.
+    window.Kakao.Share.sendScrap({ requestUrl: url });
   }
 
   return (
