@@ -83,8 +83,9 @@ export default function ShareBar({
 
   function shareKakao() {
     if (!window.Kakao?.Share) return;
-    // Derive /form URL from the origin (same host, no path)
+    // Derive URLs from the origin
     const origin = new URL(url).origin;
+    const homeUrl = `${origin}/`;
     const formUrl = `${origin}/form`;
     window.Kakao.Share.sendDefault({
       objectType: "feed",
@@ -92,7 +93,8 @@ export default function ShareBar({
         title,
         description,
         imageUrl,
-        link: { mobileWebUrl: url, webUrl: url },
+        // 카드 본체 탭 → 홈으로. 보는 사람이 서비스 소개부터 만나게 됨.
+        link: { mobileWebUrl: homeUrl, webUrl: homeUrl },
       },
       buttons: [
         { title: "결과 보기", link: { mobileWebUrl: url, webUrl: url } },
