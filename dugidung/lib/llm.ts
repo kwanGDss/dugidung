@@ -100,9 +100,10 @@ function anthropicCaller(): Caller["call"] {
 }
 
 function providerCaller(): Caller["call"] {
-  const provider = (process.env.LLM_PROVIDER ?? "openai").toLowerCase();
-  if (provider === "anthropic") return anthropicCaller();
-  return openaiCaller();
+  // Default to Anthropic (Claude). Set LLM_PROVIDER=openai to override.
+  const provider = (process.env.LLM_PROVIDER ?? "anthropic").toLowerCase();
+  if (provider === "openai") return openaiCaller();
+  return anthropicCaller();
 }
 
 function parse(raw: string): Letter | null {
