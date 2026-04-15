@@ -5,6 +5,12 @@ import type { Letter, MBTI, Pillars, Score } from "@/lib/types";
 import { PROMPT_VERSION, SYSTEM_PROMPT, buildUserPrompt } from "@/lib/prompts";
 import { fallbackLetter } from "@/data/fallback-letters";
 
+const TimePointSchema = z.object({
+  when: z.string().min(2).max(40),
+  mood: z.string().min(10).max(260),
+  action: z.string().min(5).max(200),
+});
+
 const LetterSchema = z.object({
   title: z.string().min(3).max(30),
   body: z.string().min(100).max(1200),
@@ -18,6 +24,7 @@ const LetterSchema = z.object({
     tension: z.string().min(10).max(160),
     advice: z.string().min(10).max(160),
   }),
+  timeline: z.array(TimePointSchema).length(6).optional(),
 });
 
 export interface GenerateArgs {
