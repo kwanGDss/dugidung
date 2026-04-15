@@ -11,6 +11,7 @@ import ArchetypeBadge from "@/components/ArchetypeBadge";
 import PillarCards from "@/components/PillarCards";
 import OhaengDistribution from "@/components/OhaengDistribution";
 import SeasonCards from "@/components/SeasonCards";
+import TimelineCards from "@/components/TimelineCards";
 
 interface Props { params: Promise<{ hash: string }> }
 
@@ -107,7 +108,10 @@ export default async function Result({ params }: Props) {
         {/* 7. 관계의 계절 */}
         <SeasonCards seasons={rec.letter.seasons} />
 
-        {/* 8. 요약 */}
+        {/* 8. 관계의 달력 (optional — only on v2.1+ records) */}
+        {rec.letter.timeline && <TimelineCards timeline={rec.letter.timeline} />}
+
+        {/* 9. 요약 */}
         <Summary rec={rec} />
 
         {/* 10. 공유 바 */}
