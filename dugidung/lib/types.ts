@@ -33,12 +33,19 @@ export interface Seasons {
   advice: string;
 }
 
+export interface TimePoint {
+  when: string;    // 시점 라벨 (2~40자) — 예: "지금 · 0~1개월"
+  mood: string;    // 분위기 예측 (10~260자)
+  action: string;  // 구체 행동 (5~200자)
+}
+
 export interface Letter {
   title: string;
   body: string;
   pullQuote: string;
   archetype: Archetype;
   seasons: Seasons;
+  timeline?: TimePoint[];       // NEW — 6 items when present (optional for v2 cache compat)
   promptVersion: string;
   source: "llm" | "fallback";
 }
